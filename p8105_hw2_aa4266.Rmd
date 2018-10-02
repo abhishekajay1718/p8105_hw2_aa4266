@@ -105,7 +105,30 @@ Import and manipulation of the Mr. Trash Wheel Dataset.
 ```{r p2_data_import}
 mr_trash_wheel_data =
   read_excel("./datasets/HealthyHarborWaterWheelTotals2017-9-26.xlsx", range = "A2:O258") %>%
-  filter(is.na(X__1)) %>%
-  select(-X__1)
+  janitor::clean_names() %>%
+  filter(is.na(x_1)) %>%
+  select(-x_1) %>%
+  filter(!is.na(dumpster)) %>%
+  mutate(sports_balls = as.integer(round(sports_balls)))
 ```
 
+Import and manipulation of the precipitation data from 2016 and 2017
+
+```{r p2_data_import_precp}
+mr_trash_wheel_precip_data_2017 =
+  read_excel("./datasets/HealthyHarborWaterWheelTotals2017-9-26.xlsx", sheet = 3, range = "A2:B15") %>% 
+  janitor::clean_names() %>%
+  filter(!is.na(total)) %>%
+  select(month, total_precipitation = total)
+
+mr_trash_wheel_precip_data_2017$year = 2017
+
+mr_trash_wheel_precip_data_2016 =
+  read_excel("./datasets/HealthyHarborWaterWheelTotals2017-9-26.xlsx", sheet = 4, range = "A2:B15") %>% 
+  janitor::clean_names() %>%
+  filter(!is.na(total)) %>%
+  select(month, total_precipitation = total)
+
+mr_trash_wheel_precip_data_2016$year = 2016
+
+```
