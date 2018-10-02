@@ -2,7 +2,9 @@
 title: "P8105 HW2"
 author: "Abhishek Ajay (aa4266)"
 date: "October 1, 2018"
-output: github_document
+output: 
+  github_document:
+     df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -55,3 +57,42 @@ n_stations_without_vending =
   count()/nrow(nyc_transit_data[which(nyc_transit_data$vending == "NO"),])
 ```
 
+##Reformating of the data
+
+Here we reformat the data such the route number and the route name are distinct variables.
+
+```{r p1_reformatting}
+nyc_transit_data_reformatting =
+  nyc_transit_data %>%
+  gather(key = route_number, value = route_name, route1:route11) %>%
+  separate(route_number, into = c("route_str", "route_number"), sep = 5) %>%
+  select(-route_str)
+  #filter(distinct(route_number, route_name))
+nyc_transit_data_reformatting
+```
+
+##Further questions on the reformatted table
+
+###Question 1 
+
+How many distinct stations serve the A train?
+
+```{r p1_reformatting_q1}
+nyc_transit_data_reformatting %>%
+  filter(route_name == "A") %>%
+  distinct(line, station_name) %>%
+  count() %>%
+  knitr::kable()
+```
+
+###Question 2
+
+Of the stations that serve the A train, how many are ADA compliant?
+
+```{r p1_reformatting_q2}
+nyc_transit_data_reformatting %>%
+  filter(route_name == "A", ada == TRUE) %>%
+  distinct(line, station_name) %>%
+  count() %>%
+  knitr::kable()
+```
