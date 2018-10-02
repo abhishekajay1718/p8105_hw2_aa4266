@@ -55,5 +55,3 @@ n_stations_without_vending =
   count()/nrow(nyc_transit_data[which(nyc_transit_data$vending == "NO"),])
 ```
 
-
-
