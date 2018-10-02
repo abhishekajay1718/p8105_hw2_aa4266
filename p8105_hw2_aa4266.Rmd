@@ -10,6 +10,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
+library(p8105.datasets)
 ```
  
 #Problem 1
@@ -138,4 +139,27 @@ Combining the the precipitation data tables fromm both 2016 and 2017.
 mr_trash_wheel_precip_data_2016_2017 =
   left_join(mr_trash_wheel_precip_data_2016, mr_trash_wheel_precip_data_2017, by = 'month') %>%
   mutate(month = month.name[month])
+```
+
+
+##Write some stuff abotu problem 2
+
+
+#Problem 3
+
+Here we use the BRFSS data set from the P8105.datasets package and format it.
+```{r p3_data_impot_format}
+#View(p8105.datasets::brfss_smart2010)
+
+brfss_dataset =
+  p8105.datasets::brfss_smart2010 %>%
+  janitor::clean_names() %>% 
+  rename(resp_id = respid, location_abbreviation = locationabbr, location_desc = locationdesc) %>% 
+  filter(topic == "Overall Health") %>% 
+  select(-c(class:question), -sample_size, -c(confidence_limit_low:geo_location)) %>% 
+  spread(key = response, value = data_value) %>% 
+  janitor::clean_names() %>% 
+  mutate(excellent_or_very_good = excellent + very_good)
+  
+
 ```
