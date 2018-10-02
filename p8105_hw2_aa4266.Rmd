@@ -12,10 +12,48 @@ library(tidyverse)
  
 #Problem 1
 
+##Data import and manipulation
+
 ```{r p1_data_import}
 nyc_transit_data = 
   read_csv("./datasets/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>%
   janitor::clean_names() %>%
   select(line:entry, vending, ada) %>%
-  mutate(entry, entry = as.logical(entry))
+  mutate(entry = recode(entry, "YES" = TRUE, "NO" = FALSE))
 ```
+##Further Questions
+
+###Question 1
+
+How many distinct stations are there?
+
+```{r p1_q1}
+#count(distinct(nyc_transit_data, line, station_name))
+distinct(nyc_transit_data, line, station_name) %>%
+  count()
+  
+```
+
+###Question 2
+
+How many stations are ADA compliant?
+
+```{r p1_q2}
+nyc_transit_data %>%
+  filter(ada == TRUE) %>%
+  distinct(line, station_name) %>%
+  count()
+```
+###Question 3
+
+What proportion of station entrances / exits without vending allow entrance?
+
+```{r p1_q3}
+n_stations_without_vending =
+  nyc_transit_data %>%
+  filter(vending == "NO", entry == TRUE) %>%
+  count()/nrow(nyc_transit_data[which(nyc_transit_data$vending == "NO"),])
+```
+
+
+
