@@ -3,13 +3,13 @@ title: "P8105 HW2"
 author: "Abhishek Ajay (aa4266)"
 date: "October 1, 2018"
 output: 
-  github_document:
-     df_print: paged
+  github_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(readxl)
 ```
  
 #Problem 1
@@ -32,8 +32,8 @@ How many distinct stations are there?
 ```{r p1_q1}
 #count(distinct(nyc_transit_data, line, station_name))
 distinct(nyc_transit_data, line, station_name) %>%
-  count()
-  
+  count() %>%
+  knitr::kable()
 ```
 
 ###Question 2
@@ -44,7 +44,8 @@ How many stations are ADA compliant?
 nyc_transit_data %>%
   filter(ada == TRUE) %>%
   distinct(line, station_name) %>%
-  count()
+  count() %>%
+  knitr::kable()
 ```
 ###Question 3
 
@@ -54,7 +55,8 @@ What proportion of station entrances / exits without vending allow entrance?
 n_stations_without_vending =
   nyc_transit_data %>%
   filter(vending == "NO", entry == TRUE) %>%
-  count()/nrow(nyc_transit_data[which(nyc_transit_data$vending == "NO"),])
+  count()/nrow(nyc_transit_data[which(nyc_transit_data$vending == "NO"),]) %>%
+  knitr::kable()
 ```
 
 ##Reformating of the data
@@ -68,7 +70,6 @@ nyc_transit_data_reformatting =
   separate(route_number, into = c("route_str", "route_number"), sep = 5) %>%
   select(-route_str)
   #filter(distinct(route_number, route_name))
-nyc_transit_data_reformatting
 ```
 
 ##Further questions on the reformatted table
@@ -96,3 +97,15 @@ nyc_transit_data_reformatting %>%
   count() %>%
   knitr::kable()
 ```
+
+#Problem 2
+
+Import and manipulation of the Mr. Trash Wheel Dataset.
+
+```{r p2_data_import}
+mr_trash_wheel_data =
+  read_excel("./datasets/HealthyHarborWaterWheelTotals2017-9-26.xlsx", range = "A2:O258") %>%
+  filter(is.na(X__1)) %>%
+  select(-X__1)
+```
+
