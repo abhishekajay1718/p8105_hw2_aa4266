@@ -114,15 +114,7 @@ mr_trash_wheel_data =
 
 Import and manipulation of the precipitation data from 2016 and 2017
 
-```{r p2_data_import_precp}
-mr_trash_wheel_precip_data_2017 =
-  read_excel("./datasets/HealthyHarborWaterWheelTotals2017-9-26.xlsx", sheet = 3, range = "A2:B15") %>% 
-  janitor::clean_names() %>%
-  filter(!is.na(total)) %>%
-  select(month, total_precipitation = total)
-
-mr_trash_wheel_precip_data_2017$year = 2017
-
+```{r p2_data_import_precip}
 mr_trash_wheel_precip_data_2016 =
   read_excel("./datasets/HealthyHarborWaterWheelTotals2017-9-26.xlsx", sheet = 4, range = "A2:B15") %>% 
   janitor::clean_names() %>%
@@ -131,4 +123,19 @@ mr_trash_wheel_precip_data_2016 =
 
 mr_trash_wheel_precip_data_2016$year = 2016
 
+mr_trash_wheel_precip_data_2017 =
+  read_excel("./datasets/HealthyHarborWaterWheelTotals2017-9-26.xlsx", sheet = 3, range = "A2:B15") %>% 
+  janitor::clean_names() %>%
+  filter(!is.na(total)) %>%
+  select(month, total_precipitation = total)
+
+mr_trash_wheel_precip_data_2017$year = 2017
+```
+
+Combining the the precipitation data tables fromm both 2016 and 2017.
+
+```{r p2_precip_combining}
+mr_trash_wheel_precip_data_2016_2017 =
+  left_join(mr_trash_wheel_precip_data_2016, mr_trash_wheel_precip_data_2017, by = 'month') %>%
+  mutate(month = month.name[month])
 ```
