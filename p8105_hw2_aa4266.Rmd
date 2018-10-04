@@ -25,39 +25,53 @@ nyc_transit_data =
   select(line:entry, vending, ada) %>%
   mutate(entry = recode(entry, "YES" = TRUE, "NO" = FALSE))
 ```
-##Further Questions
+The dataset at hand contains information related to each entrance and exit for *each* subway station in New York City. 
+
+The variables in the original dataset are Division, Line, Station Name, Station Latitute and Longitude, Route names of Route numbers 1 to 11, each station's Entrace Type, whether they have an entry or not, whether they're Exit only or not, whether they have Vending, Staffing scenario (NONE, FULL, PART), Staff hours, ADA Complaince, some notes regarding ADA, availability of Free Crossover, the station's North South Street and East West Street, the station's Corner, Entrance Latitude, Longitude, Station Location, Entrance Location. 
+
+The data has been imported and cleaned by cleaning the column names into to standard, single format (underscore), selection of specific columns such as all columns from line to entry and vending and ADA compliance data, that are relevant for further analysis. The cell data of the entry column has been converted from character YES/NO into logical TRUE and FALSE. 
+
+The dimensions of the new table is `r dim(nyc_transit_data)`
+
+No, the data isn't tidy. The columns are redundant with columns for each route number. 
+
+##Further Questions on this data:
 
 ###Question 1
 
 How many distinct stations are there?
 
-```{r p1_q1}
-#count(distinct(nyc_transit_data, line, station_name))
-distinct(nyc_transit_data, line, station_name) %>%
-  count() %>%
-  knitr::kable()
-```
+There are `r count(distinct(nyc_transit_data, line, station_name))`
 
 ###Question 2
 
 How many stations are ADA compliant?
 
 ```{r p1_q2}
-nyc_transit_data %>%
-  filter(ada == TRUE) %>%
-  distinct(line, station_name) %>%
-  count() %>%
-  knitr::kable()
+print(paste(
+  "There are",
+  nyc_transit_data %>% 
+    filter(ada == TRUE) %>% 
+    distinct(line, station_name) %>% 
+    count(),
+  "stations that are ADA complaint"
+  )
+)
 ```
+There are `r  count(distinct(nyc_transit_data[which(nyc_transit_data$ada == TRUE),], line, station_name))`
+
 ###Question 3
 
 What proportion of station entrances / exits without vending allow entrance?
 
 ```{r p1_q3}
-nyc_transit_data %>%
+stn_wo_vending_w_entrance_porportion =
+  nyc_transit_data %>%
   filter(vending == "NO", entry == TRUE) %>%
   count()/nrow(nyc_transit_data[which(nyc_transit_data$vending == "NO"),]) 
 ```
+
+The proportion of station entrances/exits without vending that allow entrance are `r stn_wo_vending_w_entrance_porportion`
 
 ##Reformating of the data
 
@@ -69,7 +83,6 @@ nyc_transit_data_reformatting =
   gather(key = route_number, value = route_name, route1:route11) %>%
   separate(route_number, into = c("route_str", "route_number"), sep = 5) %>%
   select(-route_str)
-  #filter(distinct(route_number, route_name))
 ```
 
 ##Further questions on the reformatted table
@@ -79,11 +92,15 @@ nyc_transit_data_reformatting =
 How many distinct stations serve the A train?
 
 ```{r p1_reformatting_q1}
-nyc_transit_data_reformatting %>%
-  filter(route_name == "A") %>%
-  distinct(line, station_name) %>%
-  count() %>%
-  knitr::kable()
+print(paste(
+  "Number of distinct stations serving the A train:", 
+    nyc_transit_data_reformatting %>%
+      filter(route_name == "A") %>%
+      distinct(line, station_name) %>%
+      count() %>% 
+      as.numeric()
+    )
+  ) 
 ```
 
 ###Question 2
@@ -91,11 +108,14 @@ nyc_transit_data_reformatting %>%
 Of the stations that serve the A train, how many are ADA compliant?
 
 ```{r p1_reformatting_q2}
-nyc_transit_data_reformatting %>%
-  filter(route_name == "A", ada == TRUE) %>%
-  distinct(line, station_name) %>%
-  count() %>%
-  knitr::kable()
+print(paste(
+  "ADA complaint stations that serve the A train:",
+  nyc_transit_data_reformatting %>%
+    filter(route_name == "A", ada == TRUE) %>%
+    distinct(line, station_name) %>%
+    count()
+  )
+)
 ```
 
 #Problem 2
@@ -141,7 +161,7 @@ mr_trash_wheel_precip_data_2016_2017 =
 ```
 
 
-##Write some stuff abotu problem 2
+##Write some stuff about problem 2
 
 
 #Problem 3
@@ -194,11 +214,11 @@ excellent_2002 =
   filter(year == 2002) %>%
   select(excellent) 
 
-#brfss_dataset %>% 
- # filter(year == 2002) %>%
-#  select(excellent) %>%
-#  median(#selecting a single column, na.rm = T)
-
+#excellent_2002 %>% 
+#   filter(year == 2002) %>%
+#   select(excellent) %>%
+#   median( na.rm = TRUE)
+#   selecting a single column, na.rm = T
 
 ```
 
@@ -222,6 +242,5 @@ Make a scatterplot showing the proportion of “Excellent” response values in 
 ```{r p3_q4}
 brfss_dataset %>% 
   filter(location_desc == "NY - New York County" | location_desc == "NY - Queens County") %>%
-  mutate(excellent_proportion = excellent/(excellent + fair + poor + good + very_good)) %>% 
-  ggplot(aes(x = excellent_proportion, y = year)) + geom_point(aes(color = location_desc))
+  ggplot(aes(x = year, y = excellent )) + geom_point(aes(color = location_desc))
 ```
