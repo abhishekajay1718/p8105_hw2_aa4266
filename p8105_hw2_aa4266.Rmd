@@ -53,11 +53,9 @@ nyc_transit_data %>%
 What proportion of station entrances / exits without vending allow entrance?
 
 ```{r p1_q3}
-n_stations_without_vending =
-  nyc_transit_data %>%
+nyc_transit_data %>%
   filter(vending == "NO", entry == TRUE) %>%
-  count()/nrow(nyc_transit_data[which(nyc_transit_data$vending == "NO"),]) %>%
-  knitr::kable()
+  count()/nrow(nyc_transit_data[which(nyc_transit_data$vending == "NO"),]) 
 ```
 
 ##Reformating of the data
@@ -160,6 +158,52 @@ brfss_dataset =
   spread(key = response, value = data_value) %>% 
   janitor::clean_names() %>% 
   mutate(excellent_or_very_good = excellent + very_good)
-  
-
 ```
+
+##Further questions on brfss_dataset
+
+###Question 1
+
+How many unique locations are included in the dataset? Is every state represented? What state is observed the most?
+
+```{r p3_q1}
+brfss_dataset %>%
+  distinct(location_abbreviation) %>% 
+  count()
+```
+
+All 50 states and 1 US Territory, the District of Columbia are represented in the Table.
+
+```{r p3_q1_mode}
+#table(brfss_dataset$location_abbreviation) %>%
+ # which.max()
+most_obsv_state = 
+  table(brfss_dataset$location_abbreviation) %>%
+  sort() %>% 
+  names() %>% 
+  tail(1)
+```
+
+The most observed state in the table is `r most_obsv_state`.
+
+
+```{r p3_q2_q3}
+excellent_2002 =
+  brfss_dataset %>% 
+  filter(year == 2002) %>%
+  select(excellent) 
+```
+
+###Question 2
+
+In 2002, what is the median of the “Excellent” response value?
+The median of the "Excellent" response value in 2002 is `r median(excellent_2002$excellent, na.rm = TRUE)`. 
+
+###Question 3
+
+Make a histogram of “Excellent” response values in the year 2002.
+
+```{r p3_q3_plot} 
+hist(excellent_2002$excellent, main = "Histogram of \"Excellent\" response values in 2002", xlab = "excellent values" )
+```
+
