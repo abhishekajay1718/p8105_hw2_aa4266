@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
 library(p8105.datasets)
+library(ggplot2)
 ```
  
 #Problem 1
@@ -192,6 +193,13 @@ excellent_2002 =
   brfss_dataset %>% 
   filter(year == 2002) %>%
   select(excellent) 
+
+#brfss_dataset %>% 
+ # filter(year == 2002) %>%
+#  select(excellent) %>%
+#  median(#selecting a single column, na.rm = T)
+
+
 ```
 
 ###Question 2
@@ -207,3 +215,13 @@ Make a histogram of “Excellent” response values in the year 2002.
 hist(excellent_2002$excellent, main = "Histogram of \"Excellent\" response values in 2002", xlab = "excellent values" )
 ```
 
+###Question 4
+
+Make a scatterplot showing the proportion of “Excellent” response values in New York County and Queens County (both in NY State) in each year from 2002 to 2010.
+
+```{r p3_q4}
+brfss_dataset %>% 
+  filter(location_desc == "NY - New York County" | location_desc == "NY - Queens County") %>%
+  mutate(excellent_proportion = excellent/(excellent + fair + poor + good + very_good)) %>% 
+  ggplot(aes(x = excellent_proportion, y = year)) + geom_point(aes(color = location_desc))
+```
