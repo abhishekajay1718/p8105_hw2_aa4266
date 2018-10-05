@@ -303,7 +303,7 @@ hist(excellent_2002$excellent, main = "Histogram of \"Excellent\" response value
 
 Make a scatterplot showing the proportion of “Excellent” response values in New York County and Queens County (both in NY State) in each year from 2002 to 2010.
 
-Scatterplot
+Scatterplot code chunk
 ```{r p3_q4}
 brfss_dataset %>% 
   filter(location_desc == "NY - New York County" | location_desc == "NY - Queens County") %>%
