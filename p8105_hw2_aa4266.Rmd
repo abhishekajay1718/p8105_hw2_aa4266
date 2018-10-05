@@ -48,32 +48,34 @@ There are `r count(distinct(nyc_transit_data, line, station_name))`
 How many stations are ADA compliant?
 
 ```{r p1_q2}
-print(paste(
-  "There are",
-  nyc_transit_data %>% 
-    filter(ada == TRUE) %>% 
-    distinct(line, station_name) %>% 
-    count(),
-  "stations that are ADA complaint"
+print(
+  paste(
+    "There are",
+    nyc_transit_data %>% 
+      filter(ada == TRUE) %>% 
+      distinct(line, station_name) %>% 
+      count(),
+    "stations that are ADA complaint"
   )
 )
 ```
-There are `r  count(distinct(nyc_transit_data[which(nyc_transit_data$ada == TRUE),], line, station_name))`
 
 ###Question 3
 
 What proportion of station entrances / exits without vending allow entrance?
 
 ```{r p1_q3}
-stn_wo_vending_w_entrance_porportion =
-  nyc_transit_data %>%
-  filter(vending == "NO", entry == TRUE) %>%
-  count()/nrow(nyc_transit_data[which(nyc_transit_data$vending == "NO"),]) 
+print(
+  paste(
+    "The proportion of stations entrances/exits without vending that allow entrance are",
+    nyc_transit_data %>%
+      filter(vending == "NO", entry == TRUE) %>%
+      count()/nrow(nyc_transit_data[which(nyc_transit_data$vending == "NO"),])
+  )
+) 
 ```
 
-The proportion of station entrances/exits without vending that allow entrance are `r stn_wo_vending_w_entrance_porportion`
-
-##Reformating of the data
+###Reformatting of the data
 
 Here we reformat the data such the route number and the route name are distinct variables.
 
@@ -92,15 +94,15 @@ nyc_transit_data_reformatting =
 How many distinct stations serve the A train?
 
 ```{r p1_reformatting_q1}
-print(paste(
-  "Number of distinct stations serving the A train:", 
+print(
+  paste(
+    "The number of distinct stations serving the A train:",
     nyc_transit_data_reformatting %>%
       filter(route_name == "A") %>%
       distinct(line, station_name) %>%
-      count() %>% 
-      as.numeric()
-    )
-  ) 
+      count()
+  )
+) 
 ```
 
 ###Question 2
@@ -124,40 +126,48 @@ Import and manipulation of the Mr. Trash Wheel Dataset.
 
 ```{r p2_data_import}
 mr_trash_wheel_data =
-  read_excel("./datasets/HealthyHarborWaterWheelTotals2017-9-26.xlsx", range = "A2:O258") %>%
+  read_excel("./datasets/HealthyHarborWaterWheelTotals2018-7-28.xlsx", range = "A2:O338") %>%
   janitor::clean_names() %>%
   filter(is.na(x_1)) %>%
   select(-x_1) %>%
   filter(!is.na(dumpster)) %>%
-  mutate(sports_balls = as.integer(round(sports_balls)))
+  mutate(sports_balls = as.integer(round(sports_balls))) %>% 
+  rename("weight" = weight_tons, "volume" = volume_cubic_yards)
 ```
 
 Import and manipulation of the precipitation data from 2016 and 2017
 
 ```{r p2_data_import_precip}
 mr_trash_wheel_precip_data_2016 =
-  read_excel("./datasets/HealthyHarborWaterWheelTotals2017-9-26.xlsx", sheet = 4, range = "A2:B15") %>% 
+  read_excel("./datasets/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 5, range = "A2:B15") %>% 
   janitor::clean_names() %>%
   filter(!is.na(total)) %>%
-  select(month, total_precipitation = total)
+  select(month, total_precipitation = total) #%>% 
+#  mutate(month = month.name[month])
 
 mr_trash_wheel_precip_data_2016$year = 2016
+#mr_trash_wheel_precip_data_2016$month[13] = "Grand Total"
+
 
 mr_trash_wheel_precip_data_2017 =
-  read_excel("./datasets/HealthyHarborWaterWheelTotals2017-9-26.xlsx", sheet = 3, range = "A2:B15") %>% 
+  read_excel("./datasets/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 4, range = "A2:B15") %>% 
   janitor::clean_names() %>%
   filter(!is.na(total)) %>%
-  select(month, total_precipitation = total)
+  select(month, total_precipitation = total) #%>% 
+ # mutate(month = month.name[month])
 
 mr_trash_wheel_precip_data_2017$year = 2017
+#mr_trash_wheel_precip_data_2017$month[13] = "Grand Total"
 ```
 
 Combining the the precipitation data tables fromm both 2016 and 2017.
 
 ```{r p2_precip_combining}
 mr_trash_wheel_precip_data_2016_2017 =
-  left_join(mr_trash_wheel_precip_data_2016, mr_trash_wheel_precip_data_2017, by = 'month') %>%
+  left_join(mr_trash_wheel_precip_data_2016, mr_trash_wheel_precip_data_2017, by = 'month') %>% 
   mutate(month = month.name[month])
+
+mr_trash_wheel_precip_data_2016_2017$month[13] = "Grand Total"
 ```
 
 
