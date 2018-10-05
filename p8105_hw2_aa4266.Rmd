@@ -23,7 +23,7 @@ nyc_transit_data =
   read_csv("./datasets/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>%
   janitor::clean_names() %>%
   select(line:entry, vending, ada) %>%
-  mutate(entry = recode(entry, "YES" = TRUE, "NO" = FALSE)) #as.logical on character gives error
+  mutate(entry = recode(entry, "YES" = TRUE, "NO" = FALSE)) #as.logical on character gives error therefore explicit coercion
 ```
 The dataset at hand contains information related to *each* entrance and exit for *each* subway station in New York City. 
 
@@ -37,11 +37,13 @@ tibble(
   knitr::kable(col.names = c("Variables", "Variables"), caption = "Variables in the original dataset", align = 'l')
 ```
 
-The data has been imported and cleaned by cleaning the column names into a standard, common format (underscore). Then a selection of specific columns from line to entry and vending and ADA compliance data, that are relevant for further analysis. The cell data of the entry column has been converted from character YES/NO into logical TRUE and FALSE. 
+The data has been imported and cleaned by cleaning the column names into a **standard common format (underscore)**. Then a selection of specific columns from line to entry and vending and ADA compliance data, that are relevant for further analysis is done. The cell data of the entry column has been converted from character YES/NO into logical TRUE and FALSE by explicit coercion. 
 
 The dimensions of the new table is `r t(dim(nyc_transit_data)) %>% knitr::kable(col.names = c("Rows", "Columns"))`
 
 No, the data isn't tidy. The columns are redundant with columns for each route number. 
+
+**NOTE**: In most of the following code chunks, print()/cat() function is used to give a direct sentence output for the questions. Therefore, you might not find a lot of text outside the code chunks in the .Rmd files but it will have all outputs in the .md files.
 
 ##Further Questions on this data:
 
@@ -76,7 +78,7 @@ What proportion of station entrances / exits without vending allow entrance?
 ```{r p1_q3}
 print(
   paste(
-    "The proportion of stations entrances/exits without vending that allow entrance are",
+    "The proportion of station entrances/exits without vending that allow entrance are",
     nyc_transit_data %>%
       filter(vending == "NO", entry == TRUE) %>% #filter using two conditions that are satisfied together
       count()/nrow(nyc_transit_data[which(nyc_transit_data$vending == "NO"),])
@@ -88,7 +90,7 @@ Since our dataset contains information related to *each* entrance and exit for *
 
 ###Reformatting of the data
 
-Here we reformat the data such the route number and the route name are distinct variables.
+Here we reformat the data such that the route number and the route name are distinct variables.
 
 ```{r p1_reformatting}
 nyc_transit_data_reformatting =
@@ -98,7 +100,7 @@ nyc_transit_data_reformatting =
   select(-route_str) #dropping the column with just "route" written in its every cell
 ```
 
-Upon reformatting the NYC transit data, we got a new table with dimensions : `r t(dim(nyc_transit_data_reformatting)) %>% knitr::kable(col.names = c("Rows", "Columns"))`. 
+Upon reformatting the NYC transit data, we get a new table with dimensions : `r t(dim(nyc_transit_data_reformatting)) %>% knitr::kable(col.names = c("Rows", "Columns"))`. 
 
 ##Further questions on the reformatted table
 
@@ -179,13 +181,13 @@ trash_wheel_precip_data_2016_2017 =
 trash_wheel_precip_data_2016_2017$month[13] = "Grand Total"
 ```
 
-Left join was used since there are no missing values in either of the two tables and any join (constructive) will give a similar output.
+Left join was used since there are no missing values in either of the two tables and any join (constructive) will give a similar output and that the month column is exactly the same in both the tables.
 
 ##Data Description
 
-The data used here is from the *Mr. Trash Wheel* dataset taken from the course website, P8105.com which is in the excel format. However, it is openly available on Baltimore Waterfront website under the *Trash Wheel Project*. The project was initiated in 2014. The weight is in *tons* and the volume is in *cubic yards*.
+The data used here is from the *Mr. Trash Wheel* dataset taken from the course website, P8105.com which is in the excel format. However, it is openly available on the Baltimore Waterfront website under the *Trash Wheel Project*. The project was initiated in 2014. The weight is in given in *tons* and the volume is in *cubic yards*.
 
-We get the precipitaion data for years 2016 and 2017 from sheets 5 and 4 of the excel file respectively. We added an extra variable to both the tables for the year. The dimensions of both the datasets are `r t(dim(trash_wheel_precip_data_2016)) %>%  knitr::kable(col.names = c("Rows", "Colunmns"))` and the combined table with total precipitation from 2016 and 2017 is `r t(dim(trash_wheel_precip_data_2016_2017)) %>%  knitr::kable(col.names = c("Rows", "Columns"))`. Dimensions of the dumper specific Mr. Trash Wheel data set is `r t(dim(mr_trash_wheel_data)) %>%  knitr::kable(col.names = c("Rows", "Columns"))`
+We get the precipitaion data for years 2016 and 2017 from sheets 5 and 4 of the excel file respectively. We added an extra variable to both the tables for the year. The dimensions of both the datasets are `r t(dim(trash_wheel_precip_data_2016)) %>%  knitr::kable(col.names = c("Rows", "Colunmns"))` and the combined table with total precipitation from 2016 and 2017 is `r t(dim(trash_wheel_precip_data_2016_2017)) %>%  knitr::kable(col.names = c("Rows", "Columns"))`Dimensions of the dumper specific Mr. Trash Wheel data set is `r t(dim(mr_trash_wheel_data)) %>%  knitr::kable(col.names = c("Rows", "Columns"))`
 
 Number of observations for each year 2016 and 2017 precipitation dataset is `r count(trash_wheel_precip_data_2016_2017[which(trash_wheel_precip_data_2016_2017$month != "Grand Total"),])`.
 
@@ -307,3 +309,5 @@ brfss_dataset %>%
   filter(location_desc == "NY - New York County" | location_desc == "NY - Queens County") %>%
   ggplot(aes(x = year, y = excellent )) + geom_point(aes(color = location_desc)) + theme_bw()
 ```
+
+Since sum of every row from excellent to very good is 100, it implies that all entries are in proportion already. Therefore, we input just excellent in the y axis and compare it for the different years in the two counties.
