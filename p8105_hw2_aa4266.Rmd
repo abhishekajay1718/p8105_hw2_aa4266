@@ -29,45 +29,17 @@ The dataset at hand contains information related to *each* entrance and exit for
 
 The variables in the original dataset are 
 
-1. Division, 
-
-2. Line, 
-
-3. Station Name, 
-
-4. Station Latitute and Longitude, 
-
-5. Route names of Route numbers 1 to 11, 
-
-6. Each station's Entrace Type, 
-
-7. Whether they have an entry or not, 
-
-8. Whether they're Exit only or not, 
-
-9. Whether they have Vending, 
-
-10. Staffing scenario (NONE, FULL, PART), 
-
-11. Staff hours, ADA Complaince, 
-
-12. Some notes regarding ADA, 
-
-13. Availability of Free Crossover, 
-
-14. The station's North South Street and East West Street, 
-
-15. The station's Corner, 
-
-16. Entrance Latitude and Longitude, 
-
-17. Station Location, 
-
-18. Entrance Location. 
+```{r nyc_transit_variables, echo = FALSE}
+tibble(
+  vars_1 = c("Division", "Line", "Station Name", "Station Latitute and Longitude", "Route names of Route numbers 1 to 11", "Each station\'s Entrace Type", "Whether they have an entry or not", "Whether they\'re Exit only or not", "Whether they have Vending"),
+  vars_2 = c("Staffing scenario (NONE, FULL, PART)", "Staff hours, ADA Complaince", "Some notes regarding ADA", "Availability of Free Crossover", "The station\'s North South Street and East West Street", "The station\'s Corner", "Entrance Latitude and Longitude", "Station Location", "Entrance Location.")
+) %>% 
+  knitr::kable(col.names = c("Variables", "Variables"), caption = "Variables in the original dataset", align = 'l')
+```
 
 The data has been imported and cleaned by cleaning the column names into a standard, common format (underscore). Then a selection of specific columns from line to entry and vending and ADA compliance data, that are relevant for further analysis. The cell data of the entry column has been converted from character YES/NO into logical TRUE and FALSE. 
 
-The dimensions of the new table is `r dim(nyc_transit_data)`
+The dimensions of the new table is `r t(dim(nyc_transit_data)) %>% knitr::kable(col.names = c("Rows", "Columns"))`
 
 No, the data isn't tidy. The columns are redundant with columns for each route number. 
 
@@ -126,7 +98,7 @@ nyc_transit_data_reformatting =
   select(-route_str) #dropping the column with just "route" written in its every cell
 ```
 
-Upon reformatting the NYC transit data, we got a new table with dimensions : `r dim(nyc_transit_data_reformatting)`. 
+Upon reformatting the NYC transit data, we got a new table with dimensions : `r t(dim(nyc_transit_data_reformatting)) %>% knitr::kable(col.names = c("Rows", "Columns"))`. 
 
 ##Further questions on the reformatted table
 
@@ -213,11 +185,11 @@ Left join was used since there are no missing values in either of the two tables
 
 The data used here is from the *Mr. Trash Wheel* dataset taken from the course website, P8105.com which is in the excel format. However, it is openly available on Baltimore Waterfront website under the *Trash Wheel Project*. The project was initiated in 2014. The weight is in *tons* and the volume is in *cubic yards*.
 
-We get the precipitaion data for years 2016 and 2017 from sheets 5 and 4 of the excel file respectively. We added an extra variable to both the tables for the year. The dimensions of both the datasets are `r dim(trash_wheel_precip_data_2016)` and the combined table with total precipitation from 2016 and 2017 is `r dim(trash_wheel_precip_data_2016_2017)`. 
+We get the precipitaion data for years 2016 and 2017 from sheets 5 and 4 of the excel file respectively. We added an extra variable to both the tables for the year. The dimensions of both the datasets are `r t(dim(trash_wheel_precip_data_2016)) %>%  knitr::kable(col.names = c("Rows", "Colunmns"))` and the combined table with total precipitation from 2016 and 2017 is `r t(dim(trash_wheel_precip_data_2016_2017)) %>%  knitr::kable(col.names = c("Rows", "Columns"))`. Dimensions of the dumper specific Mr. Trash Wheel data set is `r t(dim(mr_trash_wheel_data)) %>%  knitr::kable(col.names = c("Rows", "Columns"))`
 
 Number of observations for each year 2016 and 2017 precipitation dataset is `r count(trash_wheel_precip_data_2016_2017[which(trash_wheel_precip_data_2016_2017$month != "Grand Total"),])`.
 
-Number of observations that are dumper sepcific in the Mr. Trash Wheel dtata set is `r nrow(mr_trash_wheel_data)`.
+Number of observations that are dumper sepcific in the Mr. Trash Wheel data set is `r nrow(mr_trash_wheel_data)`.
 
 Total homes powered since May 2014 up till July 2018 is `r round(sum(mr_trash_wheel_data$homes_powered))`.
 
