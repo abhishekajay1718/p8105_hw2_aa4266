@@ -23,13 +23,49 @@ nyc_transit_data =
   read_csv("./datasets/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>%
   janitor::clean_names() %>%
   select(line:entry, vending, ada) %>%
-  mutate(entry = recode(entry, "YES" = TRUE, "NO" = FALSE))
+  mutate(entry = recode(entry, "YES" = TRUE, "NO" = FALSE)) #as.logical on character gives error
 ```
-The dataset at hand contains information related to each entrance and exit for *each* subway station in New York City. 
+The dataset at hand contains information related to *each* entrance and exit for *each* subway station in New York City. 
 
-The variables in the original dataset are Division, Line, Station Name, Station Latitute and Longitude, Route names of Route numbers 1 to 11, each station's Entrace Type, whether they have an entry or not, whether they're Exit only or not, whether they have Vending, Staffing scenario (NONE, FULL, PART), Staff hours, ADA Complaince, some notes regarding ADA, availability of Free Crossover, the station's North South Street and East West Street, the station's Corner, Entrance Latitude, Longitude, Station Location, Entrance Location. 
+The variables in the original dataset are 
 
-The data has been imported and cleaned by cleaning the column names into to standard, single format (underscore), selection of specific columns such as all columns from line to entry and vending and ADA compliance data, that are relevant for further analysis. The cell data of the entry column has been converted from character YES/NO into logical TRUE and FALSE. 
+1. Division, 
+
+2. Line, 
+
+3. Station Name, 
+
+4. Station Latitute and Longitude, 
+
+5. Route names of Route numbers 1 to 11, 
+
+6. Each station's Entrace Type, 
+
+7. Whether they have an entry or not, 
+
+8. Whether they're Exit only or not, 
+
+9. Whether they have Vending, 
+
+10. Staffing scenario (NONE, FULL, PART), 
+
+11. Staff hours, ADA Complaince, 
+
+12. Some notes regarding ADA, 
+
+13. Availability of Free Crossover, 
+
+14. The station's North South Street and East West Street, 
+
+15. The station's Corner, 
+
+16. Entrance Latitude and Longitude, 
+
+17. Station Location, 
+
+18. Entrance Location. 
+
+The data has been imported and cleaned by cleaning the column names into a standard, common format (underscore). Then a selection of specific columns from line to entry and vending and ADA compliance data, that are relevant for further analysis. The cell data of the entry column has been converted from character YES/NO into logical TRUE and FALSE. 
 
 The dimensions of the new table is `r dim(nyc_transit_data)`
 
@@ -48,6 +84,7 @@ There are `r count(distinct(nyc_transit_data, line, station_name))`
 How many stations are ADA compliant?
 
 ```{r p1_q2}
+#Looking at the distinct stations that are ADA complaint
 print(
   paste(
     "There are",
@@ -55,7 +92,7 @@ print(
       filter(ada == TRUE) %>% 
       distinct(line, station_name) %>% 
       count(),
-    "stations that are ADA complaint"
+    "distinct stations that are ADA complaint"
   )
 )
 ```
@@ -69,11 +106,13 @@ print(
   paste(
     "The proportion of stations entrances/exits without vending that allow entrance are",
     nyc_transit_data %>%
-      filter(vending == "NO", entry == TRUE) %>%
+      filter(vending == "NO", entry == TRUE) %>% #filter using two conditions that are satisfied together
       count()/nrow(nyc_transit_data[which(nyc_transit_data$vending == "NO"),])
   )
 ) 
 ```
+
+Since our dataset contains information related to *each* entrance and exit for *each* subway station in New York City, we don't need to take distinct stations to calculate the above proportion.
 
 ###Reformatting of the data
 
@@ -82,10 +121,12 @@ Here we reformat the data such the route number and the route name are distinct 
 ```{r p1_reformatting}
 nyc_transit_data_reformatting =
   nyc_transit_data %>%
-  gather(key = route_number, value = route_name, route1:route11) %>%
-  separate(route_number, into = c("route_str", "route_number"), sep = 5) %>%
-  select(-route_str)
+  gather(key = route_number, value = route_name, route1:route11) %>% #bringing all route number columns together
+  separate(route_number, into = c("route_str", "route_number"), sep = 5) %>% #separating the route number content into two separate columns
+  select(-route_str) #dropping the column with just "route" written in its every cell
 ```
+
+Upon reformatting the NYC transit data, we got a new table with dimensions : `r dim(nyc_transit_data_reformatting)`. 
 
 ##Further questions on the reformatted table
 
@@ -122,7 +163,7 @@ print(paste(
 
 #Problem 2
 
-Import and manipulation of the Mr. Trash Wheel Dataset.
+The import and manipulation of the Mr. Trash Wheel Dataset.
 
 ```{r p2_data_import}
 mr_trash_wheel_data =
@@ -130,8 +171,10 @@ mr_trash_wheel_data =
   janitor::clean_names() %>%
   filter(!is.na(dumpster)) %>%
   mutate(sports_balls = as.integer(round(sports_balls))) %>% 
-  rename("weight" = weight_tons, "volume" = volume_cubic_yards)
+  rename("weight" = weight_tons, "volume" = volume_cubic_yards) #renaming columns to more reasonable variable names
 ```
+
+The columns weight_tons and volume_cubic_yards were renamed to weight and volume since mentioning units seems superfluous. It can be mentioned once in the data description to suffice for it.
 
 Import and manipulation of the precipitation data from 2016 and 2017
 
@@ -139,19 +182,19 @@ Import and manipulation of the precipitation data from 2016 and 2017
 trash_wheel_precip_data_2016 =
   read_excel("./datasets/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 5, range = "A2:B15") %>% 
   janitor::clean_names() %>%
-  filter(!is.na(total)) %>%
+  filter(!is.na(total)) %>%   #omit rows without precipitation data
   select(month, total_precipitation = total)
 
-trash_wheel_precip_data_2016$year = 2016
+trash_wheel_precip_data_2016$year = 2016 #Adding variable year
 
 
 trash_wheel_precip_data_2017 =
   read_excel("./datasets/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 4, range = "A2:B15") %>% 
   janitor::clean_names() %>%
-  filter(!is.na(total)) %>%
+  filter(!is.na(total)) %>%   #omit rows without precipitation data
   select(month, total_precipitation = total)
 
-trash_wheel_precip_data_2017$year = 2017
+trash_wheel_precip_data_2017$year = 2017 #Adding variable year
 ```
 
 Combining the the precipitation data tables fromm both 2016 and 2017.
@@ -164,32 +207,30 @@ trash_wheel_precip_data_2016_2017 =
 trash_wheel_precip_data_2016_2017$month[13] = "Grand Total"
 ```
 
-
-##Write some stuff about probl
-Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in both resulting datasets, and give examples of key variables. For available data, what was the total precipitation in 2017? What was the median number of sports balls in a dumpster in 2016?
-
 ##Data Description
 
-The data used here is from the *Mr. Trash Wheel* dataset taken from the course website, P8105.com which is in the excel format. However, it is openly available on Baltimore Waterfront website under the *Trash Wheel Project*. The project was initiated in 2014.
+The data used here is from the *Mr. Trash Wheel* dataset taken from the course website, P8105.com which is in the excel format. However, it is openly available on Baltimore Waterfront website under the *Trash Wheel Project*. The project was initiated in 2014. The weight is in *tons* and the volume is in *cubic yards*.
 
-We get the precipitaion data for years 2016 and 2017 from sheets 5 and 4 of the excel respectively. We added an extra variable to both the tables for year. The dimensions of both the datasets are `r dim(trash_wheel_precip_data_2016)`. 
+We get the precipitaion data for years 2016 and 2017 from sheets 5 and 4 of the excel file respectively. We added an extra variable to both the tables for the year. The dimensions of both the datasets are `r dim(trash_wheel_precip_data_2016)` and the combined table with total precipitation from 2016 and 2017 is `r dim(trash_wheel_precip_data_2016_2017)`. 
 
 Number of observations for each year 2016 and 2017 precipitation dataset is `r count(trash_wheel_precip_data_2016_2017[which(trash_wheel_precip_data_2016_2017$month != "Grand Total"),])`.
 
-Number of observations that are dumper sepcific is `r nrow(mr_trash_wheel_data)`.
+Number of observations that are dumper sepcific in the Mr. Trash Wheel dtata set is `r nrow(mr_trash_wheel_data)`.
 
-Total homes powered since May 2014 up till July 2018 is `r iohoivnorh`.
+Total homes powered since May 2014 up till July 2018 is `r round(sum(mr_trash_wheel_data$homes_powered))`.
 
 It is observed that among those rows which had no comments, the most accummulated trash is `r head((sort(colSums(select(mr_trash_wheel_data, plastic_bottles:sports_balls)), decreasing = TRUE)), 1)`
+
+Total precipitation in 2017 is `r trash_wheel_precip_data_2017$total_precipitation[13]`
+
+Median of the number of sports balls in a dumpster in 2016 is `r median(mr_trash_wheel_data$sports_balls[which(mr_trash_wheel_data$year == 2016)])`
 
 
 Using the points mentioned on http://korbedpsych.com/R02Variables.html:
 
 * Key variables for the Mr. Trash Wheel sheet of the Mr. Trash Wheel dataset are: 
   
-    * dumpster
-  
-    * year
+    * date 
   
     * weight
   
@@ -206,13 +247,11 @@ Using the points mentioned on http://korbedpsych.com/R02Variables.html:
     * year
 
 
-
 #Problem 3
 
 Here we use the BRFSS data set from the P8105.datasets package and format it.
-```{r p3_data_impot_format}
-#View(p8105.datasets::brfss_smart2010)
 
+```{r p3_data_impot_format}
 brfss_dataset =
   p8105.datasets::brfss_smart2010 %>%
   janitor::clean_names() %>% 
@@ -224,7 +263,7 @@ brfss_dataset =
   mutate(excellent_or_very_good = excellent + very_good)
 ```
 
-##Further questions on brfss_dataset
+##Further questions on BRFSS dataset
 
 ###Question 1
 
@@ -258,6 +297,7 @@ print(
 ```
 
 ```{r p3_q2_q3}
+#Creating a variable to be used in the follwing two questions
 excellent_2002 =
   brfss_dataset %>% 
   filter(year == 2002) %>%
