@@ -126,10 +126,8 @@ Import and manipulation of the Mr. Trash Wheel Dataset.
 
 ```{r p2_data_import}
 mr_trash_wheel_data =
-  read_excel("./datasets/HealthyHarborWaterWheelTotals2018-7-28.xlsx", range = "A2:O338") %>%
+  read_excel("./datasets/HealthyHarborWaterWheelTotals2018-7-28.xlsx", range = "A2:N338") %>%
   janitor::clean_names() %>%
-  filter(is.na(x_1)) %>%
-  select(-x_1) %>%
   filter(!is.na(dumpster)) %>%
   mutate(sports_balls = as.integer(round(sports_balls))) %>% 
   rename("weight" = weight_tons, "volume" = volume_cubic_yards)
@@ -138,40 +136,75 @@ mr_trash_wheel_data =
 Import and manipulation of the precipitation data from 2016 and 2017
 
 ```{r p2_data_import_precip}
-mr_trash_wheel_precip_data_2016 =
+trash_wheel_precip_data_2016 =
   read_excel("./datasets/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 5, range = "A2:B15") %>% 
   janitor::clean_names() %>%
   filter(!is.na(total)) %>%
-  select(month, total_precipitation = total) #%>% 
-#  mutate(month = month.name[month])
+  select(month, total_precipitation = total)
 
-mr_trash_wheel_precip_data_2016$year = 2016
-#mr_trash_wheel_precip_data_2016$month[13] = "Grand Total"
+trash_wheel_precip_data_2016$year = 2016
 
 
-mr_trash_wheel_precip_data_2017 =
+trash_wheel_precip_data_2017 =
   read_excel("./datasets/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 4, range = "A2:B15") %>% 
   janitor::clean_names() %>%
   filter(!is.na(total)) %>%
-  select(month, total_precipitation = total) #%>% 
- # mutate(month = month.name[month])
+  select(month, total_precipitation = total)
 
-mr_trash_wheel_precip_data_2017$year = 2017
-#mr_trash_wheel_precip_data_2017$month[13] = "Grand Total"
+trash_wheel_precip_data_2017$year = 2017
 ```
 
 Combining the the precipitation data tables fromm both 2016 and 2017.
 
 ```{r p2_precip_combining}
-mr_trash_wheel_precip_data_2016_2017 =
-  left_join(mr_trash_wheel_precip_data_2016, mr_trash_wheel_precip_data_2017, by = 'month') %>% 
+trash_wheel_precip_data_2016_2017 =
+  left_join(trash_wheel_precip_data_2016, trash_wheel_precip_data_2017, by = 'month') %>% 
   mutate(month = month.name[month])
 
-mr_trash_wheel_precip_data_2016_2017$month[13] = "Grand Total"
+trash_wheel_precip_data_2016_2017$month[13] = "Grand Total"
 ```
 
 
-##Write some stuff about problem 2
+##Write some stuff about probl
+Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in both resulting datasets, and give examples of key variables. For available data, what was the total precipitation in 2017? What was the median number of sports balls in a dumpster in 2016?
+
+##Data Description
+
+The data used here is from the *Mr. Trash Wheel* dataset taken from the course website, P8105.com which is in the excel format. However, it is openly available on Baltimore Waterfront website under the *Trash Wheel Project*. The project was initiated in 2014.
+
+We get the precipitaion data for years 2016 and 2017 from sheets 5 and 4 of the excel respectively. We added an extra variable to both the tables for year. The dimensions of both the datasets are `r dim(trash_wheel_precip_data_2016)`. 
+
+Number of observations for each year 2016 and 2017 precipitation dataset is `r count(trash_wheel_precip_data_2016_2017[which(trash_wheel_precip_data_2016_2017$month != "Grand Total"),])`.
+
+Number of observations that are dumper sepcific is `r nrow(mr_trash_wheel_data)`.
+
+Total homes powered since May 2014 up till July 2018 is `r iohoivnorh`.
+
+It is observed that among those rows which had no comments, the most accummulated trash is `r head((sort(colSums(select(mr_trash_wheel_data, plastic_bottles:sports_balls)), decreasing = TRUE)), 1)`
+
+
+Using the points mentioned on http://korbedpsych.com/R02Variables.html:
+
+* Key variables for the Mr. Trash Wheel sheet of the Mr. Trash Wheel dataset are: 
+  
+    * dumpster
+  
+    * year
+  
+    * weight
+  
+    * volume
+    
+    * homes_powered
+  
+* Key Variables for the combined precipitation dataset for 2016 and 2017 are: 
+    
+    * month
+  
+    * total_precipitation
+  
+    * year
+
 
 
 #Problem 3
@@ -198,38 +231,37 @@ brfss_dataset =
 How many unique locations are included in the dataset? Is every state represented? What state is observed the most?
 
 ```{r p3_q1}
-brfss_dataset %>%
-  distinct(location_abbreviation) %>% 
-  count()
+#Used the cat function to integrate the line break since it doesn't work with print
+cat(
+  paste(
+    "Number of unique locations included in the dataset:",
+    brfss_dataset %>% 
+      distinct(location_abbreviation) %>% 
+      count(),
+    "\n\nAll 50 states and 1 US Territory, the District of Columbia, are represent in the dataset table"
+  )
+)
 ```
-
-All 50 states and 1 US Territory, the District of Columbia are represented in the Table.
 
 ```{r p3_q1_mode}
-#table(brfss_dataset$location_abbreviation) %>%
- # which.max()
-most_obsv_state = 
-  table(brfss_dataset$location_abbreviation) %>%
-  sort() %>% 
-  names() %>% 
-  tail(1)
+print(
+  paste(
+    "The most observed state in the table is:",
+    brfss_dataset %>% 
+      select(location_abbreviation) %>% 
+      table() %>% 
+      sort() %>% 
+      names() %>% 
+      tail(1)
+  )
+)
 ```
-
-The most observed state in the table is `r most_obsv_state`.
-
 
 ```{r p3_q2_q3}
 excellent_2002 =
   brfss_dataset %>% 
   filter(year == 2002) %>%
   select(excellent) 
-
-#excellent_2002 %>% 
-#   filter(year == 2002) %>%
-#   select(excellent) %>%
-#   median( na.rm = TRUE)
-#   selecting a single column, na.rm = T
-
 ```
 
 ###Question 2
