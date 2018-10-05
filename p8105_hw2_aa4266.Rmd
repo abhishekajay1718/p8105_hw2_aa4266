@@ -207,6 +207,8 @@ trash_wheel_precip_data_2016_2017 =
 trash_wheel_precip_data_2016_2017$month[13] = "Grand Total"
 ```
 
+Left join was used since there are no missing values in either of the two tables and any join (constructive) will give a similar output.
+
 ##Data Description
 
 The data used here is from the *Mr. Trash Wheel* dataset taken from the course website, P8105.com which is in the excel format. However, it is openly available on Baltimore Waterfront website under the *Trash Wheel Project*. The project was initiated in 2014. The weight is in *tons* and the volume is in *cubic yards*.
@@ -253,27 +255,31 @@ Here we use the BRFSS data set from the P8105.datasets package and format it.
 
 ```{r p3_data_impot_format}
 brfss_dataset =
-  p8105.datasets::brfss_smart2010 %>%
+  p8105.datasets::brfss_smart2010 %>% #loading the data from the package
   janitor::clean_names() %>% 
-  rename(resp_id = respid, location_abbreviation = locationabbr, location_desc = locationdesc) %>% 
+  rename(resp_id = respid, location_abbreviation = locationabbr, location_desc = locationdesc) %>% #further manual renaming to appropriate variable names
   filter(topic == "Overall Health") %>% 
   select(-c(class:question), -sample_size, -c(confidence_limit_low:geo_location)) %>% 
-  spread(key = response, value = data_value) %>% 
+  spread(key = response, value = data_value) %>%  #restructuring the dataset
   janitor::clean_names() %>% 
   mutate(excellent_or_very_good = excellent + very_good)
 ```
 
-##Further questions on BRFSS dataset
+##Questions on the cleaned and restructured BRFSS dataset
 
 ###Question 1
 
 How many unique locations are included in the dataset? Is every state represented? What state is observed the most?
 
 ```{r p3_q1}
-#Used the cat function to integrate the line break since it doesn't work with print
+#Used the cat function to use the line break since it doesn't work with print function
 cat(
   paste(
     "Number of unique locations included in the dataset:",
+    brfss_dataset %>% 
+      distinct(location_desc) %>% 
+      count(),
+    "\n\nNumber of states represented in the dataset:",
     brfss_dataset %>% 
       distinct(location_abbreviation) %>% 
       count(),
@@ -289,9 +295,9 @@ print(
     brfss_dataset %>% 
       select(location_abbreviation) %>% 
       table() %>% 
-      sort() %>% 
+      sort() %>% #default is ascending, last is highest/biggest
       names() %>% 
-      tail(1)
+      tail(1) #1 is put in as a parameter to choose the last entry of the tail
   )
 )
 ```
@@ -307,12 +313,14 @@ excellent_2002 =
 ###Question 2
 
 In 2002, what is the median of the “Excellent” response value?
+
 The median of the "Excellent" response value in 2002 is `r median(excellent_2002$excellent, na.rm = TRUE)`. 
 
 ###Question 3
 
 Make a histogram of “Excellent” response values in the year 2002.
 
+Histogram
 ```{r p3_q3_plot} 
 hist(excellent_2002$excellent, main = "Histogram of \"Excellent\" response values in 2002", xlab = "excellent values" )
 ```
@@ -321,8 +329,9 @@ hist(excellent_2002$excellent, main = "Histogram of \"Excellent\" response value
 
 Make a scatterplot showing the proportion of “Excellent” response values in New York County and Queens County (both in NY State) in each year from 2002 to 2010.
 
+Scatterplot
 ```{r p3_q4}
 brfss_dataset %>% 
   filter(location_desc == "NY - New York County" | location_desc == "NY - Queens County") %>%
-  ggplot(aes(x = year, y = excellent )) + geom_point(aes(color = location_desc))
+  ggplot(aes(x = year, y = excellent )) + geom_point(aes(color = location_desc)) + theme_bw()
 ```
